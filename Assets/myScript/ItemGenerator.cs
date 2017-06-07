@@ -20,18 +20,22 @@ public class ItemGenerator : MonoBehaviour {
 	//Unityちゃんオブジェクト変数宣言
 	private GameObject unitychan;
 	//Unityちゃん現在Z値座標
-	private float unitychanZ;
-	//自動生成する範囲
-	private int AutoGeneRange = 50;
-	//自動生成する範囲のUnityちゃん座標
-	private float unitychanZ_autoGene;
+	private int unitychanZ;
+	//初回アイテム生成範囲
+	private int firstPos = -110;
+	//アイテム生成が発生した段階のZ座標格納（初回スタート時の為、startPos値-160格納）
+	private int ItemDistance = -160;
+	//アイテム生成間隔
+	private int itemInterval = 15;
+	//アイテム生成したUnityちゃんのZ座標から50先の座標格納
+	private int Coordinate;
 
 	// Use this for initialization
 	void Start () {
 		//シーン中のUnityちゃんオブジェクトを取得
 		this.unitychan = GameObject.Find("unitychan");
 		//一定の距離ごとにアイテムを生成
-		for (int i = startPos; i < goalPos; i+=15) {
+		for (int i = startPos; i < firstPos; i+=15) {
 			//どのアイテムを出すのかランダムに設定
 			int num = Random.Range(0,10);
 			if (num <= 1) {
@@ -60,22 +64,32 @@ public class ItemGenerator : MonoBehaviour {
 				}
 			}
 		}
+		//アイテム生成したZ座標を格納
+		this.Coordinate = this.firstPos;
 	}
 	
 	// Update is called once per frame
 	void Update () {
-		//Unityちゃんの現在Z座標の取得
-		this.unitychanZ = this.unitychan.transform.position.z;
-		//Unityちゃんの自動生成範囲座標の計算
-		this.unitychanZ_autoGene = this.unitychanZ + this.AutoGeneRange;
+		//Unityちゃんの現在Z座標の取得（Z座標はfloat型の為、intへキャスト）
+		this.unitychanZ = (int)this.unitychan.transform.position.z;
 
-		//初期値：UnityちゃんZ座標、条件：UnityちゃんZ座標が50m以内の場合に処理実行、更新：15m間隔で処理実行
-		for (float i = this.unitychanZ; i < this.unitychanZ_autoGene; i += 15) {
-			//NewItemGenerator (i);
+		//アイテム生成位置が(goalPos-10)を超えなければ生成を行う
+		if (this.Coordinate < this.goalPos-10) {
+			//アイテム生成されてからitemInterval分を移動していれば
+			if ((this.unitychanZ - this.ItemDistance) > this.itemInterval) {
+				//アイテム生成をしたZ座標を取得
+				this.Coordinate = this.Coordinate + this.itemInterval;
+
+				//アイテム生成
+				NewItemGenerator ((float)this.Coordinate);
+				//アイテム生成したUnityちゃんのZ座標を取得
+				this.ItemDistance = this.unitychanZ;
+
+			}
 		}
 	}
 
-	//発展課題用（未完成）
+	//発展課題用
 	void NewItemGenerator(float Z){
 		//どのアイテムを出すのかランダムに設定
 		int num = Random.Range(0,10);
